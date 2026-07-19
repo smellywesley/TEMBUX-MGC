@@ -1,0 +1,27 @@
+# This repo is scoped to the TembuX MGC 2026 deliverables only.
+# Everything at the root is denied by default; only the three project
+# folders below are allowed back in, so unrelated personal/client work
+# elsewhere in this working directory never gets committed.
+/*
+!/.gitignore
+!/README.md
+!/aeroglide-film/
+!/remotion-video/
+!/transfer-bridge-landing/
+
+# ---- Node / build noise inside the allowed projects ----
+aeroglide-film/node_modules/
+aeroglide-film/.verify/
+aeroglide-film/out/*.png
+aeroglide-film/out/film-probe*.mp4
+aeroglide-film/*.log
+aeroglide-film/render-log.txt
+aeroglide-film/*.tmp
+
+remotion-video/node_modules/
+remotion-video/*.log
+remotion-video/out/*.png
+
+transfer-bridge-landing/node_modules/
+transfer-bridge-landing/dist/
+transfer-bridge-landing/*.tmp

@@ -1,0 +1,17 @@
+{
+  "name": "transfer-bridge-video",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "studio": "remotion studio src/index.jsx",
+    "render": "remotion render src/index.jsx ProductReveal out/product-reveal.mp4",
+    "still": "remotion still src/index.jsx ProductReveal out/frame.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.226",
+    "@remotion/transitions": "^4.0.226",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.226"
+  }
+}
