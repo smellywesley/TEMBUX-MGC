@@ -5,9 +5,17 @@ import { fade } from '@remotion/transitions/fade'
 import { slide } from '@remotion/transitions/slide'
 import { wipe } from '@remotion/transitions/wipe'
 import { dipToBlack } from './film2/dipToBlack'
-import { A1_ColdOpen, A2_ForceBar, A3_Isotype, A4_Demand, A5_FiveTools, A6_Silence } from './film2/scenesA'
-import { B1_Reveal, B2_Lift, B3_Bridge, B4_Materials, B5_Safety, B6_Evidence } from './film2/scenesB'
-import { C1_Market, C2_Impact, C3_Close } from './film2/scenesC'
+import { A2_ForceBar, A3_Isotype, A4_Demand, A6_Silence } from './film2/scenesA'
+// B3_Bridge stays SVG-driven: the clean product plate contains no bridge
+// geometry, so using footage there would show a claim the picture doesn't make.
+import { B3_Bridge, B5_Safety, B6_Evidence } from './film2/scenesB'
+import { C1_Market, C1b_GoToMarket, C2_Impact, C3_Close } from './film2/scenesC'
+// real ward photography replaces the SVG figures for the problem act
+import { A1_ColdOpenPhoto, A5_FiveToolsPhoto } from './film2/scenesPhoto'
+// the real 60s 3D product animation drives the Act 2 showcase
+import {
+  B1_RevealVideo, B2_LiftVideo, B4_MaterialsVideo, B7_Sustainability,
+} from './film2/scenesProduct'
 
 // ---------------------------------------------------------------------------
 // Film2 — all-designed rebuild, now with CHOREOGRAPHED transitions.
@@ -40,27 +48,31 @@ const SLIDE_UP = () => slide({ direction: 'from-bottom' })
 
 const BEATS: Beat[] = [
   // ---- ACT 1 — warm, the human problem ----
-  { id: 'A1', Comp: A1_ColdOpen, duration: 240, next: { presentation: SLIDE_L(), frames: 22 } },
+  { id: 'A1', Comp: A1_ColdOpenPhoto, duration: 240, next: { presentation: SLIDE_L(), frames: 22 } },
   { id: 'A2', Comp: A2_ForceBar, duration: 330, next: { presentation: SLIDE_L(), frames: 22 } },
   { id: 'A3', Comp: A3_Isotype, duration: 300, next: { presentation: SLIDE_L(), frames: 22 } },
   { id: 'A4', Comp: A4_Demand, duration: 270, next: { presentation: SLIDE_UP(), frames: 26 } },
-  { id: 'A5', Comp: A5_FiveTools, duration: 750, next: { presentation: fade(), frames: 34 } },
+  { id: 'A5', Comp: A5_FiveToolsPhoto, duration: 750, next: { presentation: fade(), frames: 34 } },
   // the silence beat — and the warm->dark wash lives inside it.
   // ACT BOUNDARY: dip through black, never cross-fade (see dipToBlack.tsx).
   { id: 'A6', Comp: A6_Silence, duration: 150, next: { presentation: dipToBlack(), frames: 40 } },
 
   // ---- ACT 2 — dark, the engineering answer ----
-  { id: 'B1', Comp: B1_Reveal, duration: 240, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
-  { id: 'B2', Comp: B2_Lift, duration: 300, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
-  { id: 'B3', Comp: B3_Bridge, duration: 270, next: { presentation: wipe({ direction: 'from-bottom' }), frames: 24 } },
-  { id: 'B4', Comp: B4_Materials, duration: 280, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
+  { id: 'B1', Comp: B1_RevealVideo, duration: 240, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
+  { id: 'B2', Comp: B2_LiftVideo, duration: 300, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
+  { id: 'B4', Comp: B4_MaterialsVideo, duration: 280, next: { presentation: wipe({ direction: 'from-bottom' }), frames: 24 } },
+  { id: 'B3', Comp: B3_Bridge, duration: 270, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
   { id: 'B5', Comp: B5_Safety, duration: 300, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
+  { id: 'B6', Comp: B6_Evidence, duration: 240, next: { presentation: wipe({ direction: 'from-left' }), frames: 24 } },
+  // Sustainability is 15% of the MGC rubric — it earns its own scene.
   // ACT BOUNDARY (dark -> warm): must dip, a cross-fade here rendered as
   // muddy grey with doubled headlines.
-  { id: 'B6', Comp: B6_Evidence, duration: 240, next: { presentation: dipToBlack(), frames: 40 } },
+  { id: 'B7', Comp: B7_Sustainability, duration: 270, next: { presentation: dipToBlack(), frames: 40 } },
 
   // ---- ACT 3 — warm, market + close ----
   { id: 'C1', Comp: C1_Market, duration: 300, next: { presentation: SLIDE_L(), frames: 22 } },
+  // Marketing strategy — 20% of the rubric, previously the weakest criterion.
+  { id: 'C1b', Comp: C1b_GoToMarket, duration: 280, next: { presentation: SLIDE_L(), frames: 22 } },
   { id: 'C2', Comp: C2_Impact, duration: 240, next: { presentation: fade(), frames: 30 } },
   { id: 'C3', Comp: C3_Close, duration: 270 }, // ends on pure black itself
 ]

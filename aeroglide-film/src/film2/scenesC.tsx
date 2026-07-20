@@ -48,6 +48,60 @@ export const C1_Market: React.FC = () => {
   )
 }
 
+// ============ C1b — GO-TO-MARKET (280f): pilot -> proof -> scale ============
+// Marketing & Commercialisation is 20% of the rubric and the written pitch's
+// strategy (paid cluster pilot -> measured injury-reduction -> AIC scale-up)
+// had no scene. This is that scene: the story an investor actually buys.
+const GTM = [
+  {
+    k: '01 · PILOT', h: 'One hospital cluster', body:
+      'A paid pilot on the wards where the injuries happen — real patients, real shifts, real data.',
+  },
+  {
+    k: '02 · PROOF', h: 'Measured injury reduction', body:
+      'Lumbar load logged per transfer against the 3,400 N line. The pilot pays for the evidence.',
+  },
+  {
+    k: '03 · SCALE', h: 'The AIC channel', body:
+      'Injury-reduction data unlocks the Agency for Integrated Care network — every nursing home and home-care package in Singapore.',
+  },
+]
+export const C1b_GoToMarket: React.FC = () => {
+  const f = useCurrentFrame()
+  const headline = useTypeOn(f, 'We don’t sell a device. We sell the evidence.', 0)
+  const rail = ease(f, [55, 175], [0, 1])
+  return (
+    <WarmFrame>
+      <CaptionBlock world="warm" eyebrow="GO-TO-MARKET" y={90} head={<>{headline.shown}</>} />
+      {/* the rail the three steps hang from */}
+      <div style={{ position: 'absolute', left: 200, top: 430, width: `${(1520 / 1920) * 100 * rail}%`, maxWidth: 1520, height: 2, background: WARM.line }} />
+      <div style={{ position: 'absolute', left: 200, right: 200, top: 400, display: 'flex', gap: 60 }}>
+        {GTM.map((s, i) => {
+          const start = 60 + i * 45
+          const t = ease(f, [start, start + 26], [0, 1])
+          return (
+            <div key={s.k} style={{ flex: 1, opacity: t, transform: `translateY(${24 * (1 - t)}px)` }}>
+              <div style={{ width: 14, height: 14, borderRadius: 999, background: WARM.teal, margin: '23px 0 34px' }} />
+              <div style={{ ...LABEL_STYLE, color: WARM.teal, marginBottom: 16 }}>{s.k}</div>
+              <div style={{ fontFamily: FONTS.serif, fontWeight: 600, fontSize: 38, color: WARM.ink, lineHeight: 1.25 }}>{s.h}</div>
+              <div style={{ fontFamily: FONTS.sans, fontSize: 21, color: WARM.inkSoft, marginTop: 16, lineHeight: 1.6 }}>{s.body}</div>
+            </div>
+          )
+        })}
+      </div>
+      <div
+        style={{
+          position: 'absolute', left: 200, right: 200, bottom: 130, textAlign: 'center', paddingTop: 28,
+          borderTop: `1px solid ${WARM.line}`, fontFamily: FONTS.sans, fontWeight: 600, fontSize: 20,
+          color: WARM.inkSoft, letterSpacing: '0.04em', opacity: ease(f, [200, 225], [0, 1]),
+        }}
+      >
+        EVERY TRANSFER LOGGED IS A DATAPOINT THE NEXT HOSPITAL CAN’T IGNORE
+      </div>
+    </WarmFrame>
+  )
+}
+
 // ============ C2 — IMPACT (240f): three flip cards ============
 const CARDS = [
   { h: '~S$350', s: 'per unit · off-the-shelf components' },
