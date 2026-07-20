@@ -19,7 +19,10 @@ export const Odometer: React.FC<{
     <span
       style={{
         display: 'inline-flex',
-        alignItems: 'baseline',
+        // 'baseline' misaligns against the digit strips (synthetic block
+        // elements with no text baseline of their own) and made the suffix
+        // glyph (%, N, mm) float and clip oddly. Bottom-align instead.
+        alignItems: 'flex-end',
         fontFamily: FONTS.sans,
         fontWeight: weight,
         fontSize,
@@ -29,7 +32,13 @@ export const Odometer: React.FC<{
     >
       {Array.from({ length: nDigits }).map((_, i) => {
         const place = nDigits - 1 - i
-        const digitValue = (whole / 10 ** place) % 10 // continuous 0..10
+        // BUG (fixed): unfloored `(whole / 10**place) % 10` gives a
+        // permanently fractional value for every non-last digit whenever the
+        // lower digits are nonzero (e.g. 72 -> tens digit 7.2, not 7) — the
+        // strip never settles and a sliver of the next digit bleeds through
+        // forever. Only the ones digit (place 0) should roll continuously;
+        // every other digit must floor to its own integer value.
+        const digitValue = place === 0 ? whole % 10 : Math.floor(whole / 10 ** place) % 10
         // separators: thin-space groups of 3
         const needsComma = place % 3 === 2 && i !== 0
         return (

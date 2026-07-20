@@ -1,5 +1,25 @@
 # AeroGlide Film — W1 Remotion Pipeline
 
+## Film2 (current) — the all-designed rebuild
+`src/Film2.tsx` (~2:29, composition id `Film2`) is the ground-up rebuild: every
+scene is 100% code-rendered SVG/CSS (no footage, no AI generation, no
+placeholders — zero risk of a broken/missing asset in the published video).
+Three acts: warm-illustrated human problem (`src/film2/scenesA.tsx`) → dark
+engineering proof (`scenesB.tsx`) → warm market/close (`scenesC.tsx`), sharing
+`src/film2/kit.tsx`'s illustration vocabulary. Render: `npx remotion render
+src/index.ts Film2 out/film2.mp4 --codec h264`.
+
+**No audio.** The connected media-generation account has 0 credits (verified),
+so AI voiceover/music isn't available, and no royalty-free library is
+connected. Rather than bolt on a crude synthesized drone to fill the silence,
+the film ships silent — it already reads fully muted, since every claim is
+carried on-screen (captions, numbers, labels). Add real narration or a scored
+track in post; `MARKERS2` in `Film2.tsx` gives exact frame offsets per scene
+for VO sync.
+
+---
+
+
 3:45 competition film (Team TembuX · Medical Grand Challenge 2026 · Project 1464).
 1920×1080 · 30 fps · 6750 frames. Built per `SPEC.md` (the consolidated master prompt).
 

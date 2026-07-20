@@ -8,20 +8,31 @@ import { useTypeOn } from '../lib/useTypeOn'
 import { XMark } from '../components/FailureTracker'
 import {
   WARM, DARK, WarmFrame, DarkFrame, Eyebrow, Headline, CaptionBlock,
-  Figure, Wheelchair, Bed,
+  Figure, Wheelchair, Bed, ForceVector,
 } from './kit'
 
+// Shared ground-plane constants so every scene's wheelchair/bed/figure sit on
+// a common, correctly-aligned floor line (fixes the "floating seat" bug).
+const FLOOR_Y = 860
+const WHEELCHAIR_Y = FLOOR_Y - 62 // big-wheel radius, so the wheel touches the floor
+const SEAT_Y = WHEELCHAIR_Y - 76 // wheelchair cushion top — Figure(seated) origin
+const BED_Y = FLOOR_Y - 96 // bed leg height
+
 // ============ A1 — COLD OPEN (240f): the ward, the stooped lift ============
+// Register: free-body-diagram, not "acted" illustration — a rigid tilt +
+// force vector reads as credible engineering shorthand for a clinical/
+// medtech audience, and sidesteps the broken bent-limb pose from draft 1.
 export const A1_ColdOpen: React.FC = () => {
   const f = useCurrentFrame()
   const sceneIn = ease(f, [0, 24], [0, 1])
-  const lean = ease(f, [50, 110], [4, 26]) // nurse stoops into the lift
-  const strain = f > 110 ? Math.sin(f / 3) * 0.6 : 0 // barely-visible effort tremor on the arms line only
+  const lean = ease(f, [50, 130], [3, 17]) // rigid whole-body tilt only
+  const vecIn = ease(f, [70, 110], [0, 1])
   const head = useTypeOn(f, 'Every day, someone lifts.', 30)
   const subO = ease(f, [120, 145], [0, 1])
+  const SCALE = 1.35
   return (
     <WarmFrame>
-      <div style={{ position: 'absolute', top: 96, left: 0, right: 0 }}>
+      <div style={{ position: 'absolute', top: 90, left: 0, right: 0 }}>
         <Eyebrow color={WARM.red}>LATERAL PATIENT TRANSFER</Eyebrow>
         <div style={{ marginTop: 18 }}>
           <Headline color={WARM.ink} size={68}>{head.shown}</Headline>
@@ -31,20 +42,28 @@ export const A1_ColdOpen: React.FC = () => {
         </div>
       </div>
       <svg width={1920} height={1080} style={{ position: 'absolute', opacity: sceneIn }}>
-        {/* floor line */}
-        <line x1={340} y1={800} x2={1580} y2={800} stroke={WARM.line} strokeWidth={3} />
-        {/* wheelchair + seated patient */}
-        <Wheelchair stroke={WARM.ink} seat={WARM.teal + '55'} x={700} y={736} />
-        <g transform="translate(716 700)"><Figure color={WARM.red + 'cc'} seated /></g>
-        {/* bed on the right */}
-        <Bed stroke={WARM.ink} mattress={'#ffffff'} x={1080} y={704} />
-        {/* the nurse — stooped over the gap, the thesis image of the problem */}
-        <g transform={`translate(${905 + strain} 770)`}>
-          <g transform={`rotate(${lean})`}>
-            <Figure color={WARM.ink} />
+        <g transform={`translate(140 -230) scale(${SCALE})`}>
+          <line x1={320} y1={FLOOR_Y} x2={1280} y2={FLOOR_Y} stroke={WARM.line} strokeWidth={3} />
+          {/* ground shadows for depth */}
+          <ellipse cx={620} cy={FLOOR_Y + 4} rx={110} ry={10} fill={WARM.ink} opacity={0.08} />
+          <ellipse cx={920} cy={FLOOR_Y + 4} rx={70} ry={9} fill={WARM.ink} opacity={0.08} />
+
+          <Wheelchair stroke={WARM.ink} seat={WARM.teal + '55'} x={620} y={WHEELCHAIR_Y} />
+          <g transform={`translate(636 ${SEAT_Y})`}><Figure color={WARM.red + 'cc'} seated /></g>
+
+          {/* bed shortened + moved in so it stays fully on-canvas at this scale */}
+          <Bed stroke={WARM.ink} mattress="#ffffff" x={960} y={BED_Y} w={320} />
+
+          {/* the caregiver — rigid tilt at the hips, engineering-diagram register */}
+          <g transform={`translate(820 ${FLOOR_Y})`}>
+            <g transform={`rotate(${lean})`}>
+              <Figure color={WARM.ink} />
+            </g>
           </g>
-          {/* reaching arms */}
-          <line x1={-8} y1={-40} x2={-130} y2={-8} stroke={WARM.ink} strokeWidth={14} strokeLinecap="round" transform={`rotate(${lean})`} />
+          {/* free-body force vector at the lift point — kept clear of the bed */}
+          <g opacity={vecIn}>
+            <ForceVector x={750} y={FLOOR_Y - 118} angle={100} length={80} color={WARM.red} label="lift force" />
+          </g>
         </g>
       </svg>
     </WarmFrame>
@@ -83,13 +102,18 @@ export const A2_ForceBar: React.FC = () => {
       {barH > CB - threshY && (
         <div style={{ position: 'absolute', left: 740, bottom: 1080 - threshY, width: 190, height: barH - (CB - threshY), background: WARM.red, borderRadius: '6px 6px 0 0' }} />
       )}
-      <div style={{ position: 'absolute', top: threshY, left: 620, width: 680 * threshIn, borderTop: `3px dashed ${WARM.red}` }} />
-      <div style={{ position: 'absolute', top: threshY - 38, left: 1010, fontFamily: FONTS.sans, fontWeight: 600, fontSize: 21, letterSpacing: '0.1em', color: WARM.red, opacity: threshIn }}>
+      {/* dashed line spans only the chart's own column (620-950) — never reaches the number column */}
+      <div style={{ position: 'absolute', top: threshY, left: 620, width: 330 * threshIn, borderTop: `3px dashed ${WARM.red}` }} />
+      {/* label lives in the LEFT MARGIN, right-aligned to the axis — a fixed
+          580px box guarantees it can never reach the bar (740+) or the
+          number column (1150+) regardless of text length or line position */}
+      <div style={{ position: 'absolute', top: threshY - 44, left: 0, width: 600, textAlign: 'right', fontFamily: FONTS.sans, fontWeight: 600, fontSize: 20, letterSpacing: '0.09em', color: WARM.red, opacity: threshIn }}>
         INJURY-RISK THRESHOLD — 3,400 N
       </div>
-      <div style={{ position: 'absolute', left: 1060, top: 380 }}>
+      {/* number column hugs the right edge, well clear of the headline band (which ends ~y210) */}
+      <div style={{ position: 'absolute', right: 130, top: 320, textAlign: 'right' }}>
         <Odometer value={value} fontSize={130} color={value > 3400 ? WARM.red : WARM.ink} suffix="N" />
-        <div style={{ fontFamily: FONTS.sans, fontSize: 25, color: WARM.inkSoft, marginTop: 8, opacity: capO }}>
+        <div style={{ fontFamily: FONTS.sans, fontSize: 25, color: WARM.inkSoft, marginTop: 14, opacity: capO }}>
           compression at L5/S1 per manual lift
         </div>
         <div style={{ fontFamily: FONTS.sans, fontWeight: 600, fontSize: 25, color: WARM.red, marginTop: 6, opacity: cap2O }}>
@@ -113,10 +137,11 @@ export const A3_Isotype: React.FC = () => {
   const pct = ease(f, [40, 130], [0, 72])
   const gridIn = ease(f, [0, 25], [0, 1])
   const chipO = ease(f, [150, 170], [0, 1])
+  const chip2O = ease(f, [175, 195], [0, 1])
   return (
     <WarmFrame>
       <CaptionBlock world="warm" eyebrow="THE HUMAN TOLL" y={86} head={<>The people who care are getting hurt.</>} />
-      <div style={{ position: 'absolute', left: 260, top: 330, display: 'grid', gridTemplateColumns: 'repeat(10, 52px)', gap: 12, opacity: gridIn }}>
+      <div style={{ position: 'absolute', left: 300, top: 420, display: 'grid', gridTemplateColumns: 'repeat(10, 54px)', gap: 14, opacity: gridIn }}>
         {Array.from({ length: 100 }).map((_, i) => {
           const col = i % 10
           const row = Math.floor(i / 10)
@@ -127,19 +152,26 @@ export const A3_Isotype: React.FC = () => {
           return <PersonGlyph key={i} color={hurt && on ? WARM.red : hurt ? 'rgba(46,42,36,0.35)' : 'rgba(46,42,36,0.22)'} />
         })}
       </div>
-      <div style={{ position: 'absolute', right: 240, top: 380, width: 560 }}>
+      <div style={{ position: 'absolute', right: 230, top: 460, width: 560 }}>
         <Odometer value={pct} fontSize={TYPE.dataHero} color={WARM.red} suffix="%" />
-        <div style={{ fontFamily: FONTS.sans, fontSize: 29, color: WARM.ink, marginTop: 16, lineHeight: 1.45 }}>
+        <div style={{ fontFamily: FONTS.sans, fontSize: 29, color: WARM.ink, marginTop: 20, lineHeight: 1.45 }}>
           of nurses live with chronic low-back pain
         </div>
         <div
           style={{
-            display: 'inline-block', marginTop: 24, padding: '12px 22px', borderRadius: 999,
+            display: 'inline-block', marginTop: 30, padding: '12px 22px', borderRadius: 999,
             border: `1.5px solid ${WARM.line}`, fontFamily: FONTS.sans, fontWeight: 600,
             fontSize: 21, letterSpacing: '0.1em', color: WARM.ink, opacity: chipO, ...TABULAR,
           }}
         >
-          338 serious back injuries / year · MOM 2025
+          338 serious back injuries / year
+        </div>
+        <div
+          style={{
+            fontFamily: FONTS.sans, fontSize: 20, color: WARM.inkSoft, marginTop: 14, opacity: chip2O,
+          }}
+        >
+          reported to the Ministry of Manpower, 2025
         </div>
       </div>
       <SourceLine color={WARM.ink}>World Health Organization, 2018 · Ministry of Manpower, 2025</SourceLine>
@@ -179,19 +211,26 @@ export const A4_Demand: React.FC = () => {
 }
 
 // ============ A5 — FIVE TOOLS (750f): illustrated vignettes + X tracker ============
+// All vignettes share one 1200x520 stage (VB), scaled/centred identically —
+// keeps every tool visually consistent instead of five hand-tuned layouts.
 type Vignette = { label: string; verdict: string; draw: (t: number, f: number) => React.ReactNode }
 const V_STROKE = WARM.ink
+const VB_Y = 420 // wheelchair/bed floor line inside the shared stage
+const VB_WY = VB_Y - 62
+const VB_SY = VB_WY - 76
+const VB_BY = VB_Y - 96
+
 const VIGNETTES: Vignette[] = [
   {
     label: 'SLIDE BOARD',
     verdict: 'bridges the gap — but does not lift',
     draw: (t) => (
       <>
-        <Wheelchair stroke={V_STROKE} seat={WARM.teal + '55'} x={700} y={730} />
-        <Bed stroke={V_STROKE} mattress="#fff" x={1050} y={700} />
+        <Wheelchair stroke={V_STROKE} seat={WARM.teal + '55'} x={430} y={VB_WY} />
+        <Bed stroke={V_STROKE} mattress="#fff" x={780} y={VB_BY} w={360} />
         {/* board across, patient stuck at wheelchair end */}
-        <rect x={740} y={676} width={330 * t} height={12} rx={6} fill={WARM.amber} />
-        <g transform="translate(716 694)"><Figure color={WARM.red + 'cc'} seated /></g>
+        <rect x={470} y={VB_WY - 44} width={330 * t} height={12} rx={6} fill={WARM.amber} />
+        <g transform={`translate(446 ${VB_SY})`}><Figure color={WARM.red + 'cc'} seated /></g>
       </>
     ),
   },
@@ -200,13 +239,12 @@ const VIGNETTES: Vignette[] = [
     verdict: 'built for lying flat — wrong geometry for a seated body',
     draw: (t) => (
       <>
-        {/* supine mat works; seated mismatch highlighted */}
-        <Bed stroke={V_STROKE} mattress="#fff" x={520} y={700} w={330} />
-        <rect x={540} y={648} width={290} height={22} rx={11} fill={WARM.teal + '88'} />
-        <Wheelchair stroke={V_STROKE} seat={WARM.teal + '55'} x={1250} y={730} />
-        <g transform="translate(1266 694)"><Figure color={WARM.red + 'cc'} seated /></g>
+        <Bed stroke={V_STROKE} mattress="#fff" x={250} y={VB_BY} w={330} />
+        <rect x={270} y={VB_BY - 52} width={290} height={22} rx={11} fill={WARM.teal + '88'} />
+        <Wheelchair stroke={V_STROKE} seat={WARM.teal + '55'} x={980} y={VB_WY} />
+        <g transform={`translate(996 ${VB_SY})`}><Figure color={WARM.red + 'cc'} seated /></g>
         {/* flat mat propped uselessly against the seated form */}
-        <g transform={`translate(1130 ${700 - 40 * t}) rotate(-62)`}>
+        <g transform={`translate(860 ${VB_WY - 40 * t}) rotate(-62)`}>
           <rect x={0} y={0} width={250} height={20} rx={10} fill={WARM.red + '77'} />
         </g>
       </>
@@ -217,17 +255,23 @@ const VIGNETTES: Vignette[] = [
     verdict: 'no lifting for staff — but slow, stressful, frightening',
     draw: (t, f) => (
       <>
-        <path d={`M 760 780 L 760 480 L 1010 480 L 1010 560`} stroke={V_STROKE} strokeWidth={10} fill="none" strokeLinecap="round" />
-        {/* sling swings gently — unsettling pendulum */}
-        <g transform={`translate(1010 560) rotate(${Math.sin(f / 14) * 7 * t})`}>
-          <line x1={0} y1={0} x2={0} y2={70} stroke={V_STROKE} strokeWidth={5} />
-          <path d="M -46 70 Q 0 130 46 70 Z" fill={WARM.red + '99'} />
-          <circle cx={0} cy={64} r={18} fill={WARM.red + 'cc'} />
+        <line x1={600} y1={VB_Y} x2={600} y2={130} stroke={V_STROKE} strokeWidth={4} opacity={0.35} />
+        <path d={`M 500 ${VB_Y} L 500 200 L 750 200 L 750 280`} stroke={V_STROKE} strokeWidth={10} fill="none" strokeLinecap="round" />
+        {/* sling swings gently — unsettling pendulum. Two straps + a hammock
+            seat + a small cradled figure reads as "suspended patient";
+            the previous single blob shape didn't. */}
+        <g transform={`translate(750 280) rotate(${Math.sin(f / 14) * 7 * t})`}>
+          <line x1={0} y1={0} x2={-38} y2={86} stroke={V_STROKE} strokeWidth={4} />
+          <line x1={0} y1={0} x2={38} y2={86} stroke={V_STROKE} strokeWidth={4} />
+          <path d="M -38 86 Q 0 120 38 86 L 33 102 Q 0 132 -33 102 Z" fill={WARM.red + '77'} stroke={V_STROKE} strokeWidth={2} />
+          <g transform="translate(0 90) scale(0.5)">
+            <Figure color={WARM.red + 'ee'} seated />
+          </g>
         </g>
         {/* clock */}
-        <g transform="translate(1330 560)">
-          <circle r={54} fill="none" stroke={V_STROKE} strokeWidth={5} />
-          <line x1={0} y1={0} x2={0} y2={-40} stroke={WARM.red} strokeWidth={5} strokeLinecap="round" transform={`rotate(${lin(t, [0, 1], [0, 720])})`} />
+        <g transform="translate(1050 280)">
+          <circle r={64} fill="none" stroke={V_STROKE} strokeWidth={5} />
+          <line x1={0} y1={0} x2={0} y2={-46} stroke={WARM.red} strokeWidth={5} strokeLinecap="round" transform={`rotate(${lin(t, [0, 1], [0, 720])})`} />
         </g>
       </>
     ),
@@ -237,13 +281,15 @@ const VIGNETTES: Vignette[] = [
     verdict: 'only for patients who can already stand',
     draw: (t) => (
       <>
-        {/* standing cooperative patient with belt — then the excluded seated one */}
-        <g transform="translate(760 770)"><Figure color={WARM.teal} /></g>
-        <rect x={732} y={716} width={56} height={18} rx={9} fill={WARM.amber} />
-        <g transform="translate(1150 730)" opacity={0.45 + 0.1 * t}>
+        {/* standing cooperative patient with belt around the TRUNK (was
+            mis-positioned at head height, reading as a hat, not a belt) */}
+        <g transform={`translate(430 ${VB_Y})`}><Figure color={WARM.teal} /></g>
+        <rect x={404} y={VB_Y - 96} width={52} height={20} rx={4} fill={WARM.amber} stroke={WARM.ink} strokeWidth={2} />
+        {/* the excluded seated patient, dimmed */}
+        <g transform={`translate(880 ${VB_WY})`} opacity={0.5 + 0.08 * t}>
           <Wheelchair stroke={V_STROKE} seat={WARM.teal + '55'} />
         </g>
-        <g transform="translate(1166 694)" opacity={0.9}>
+        <g transform={`translate(896 ${VB_SY})`} opacity={0.92}>
           <Figure color={WARM.red + 'cc'} seated />
         </g>
       </>
@@ -255,11 +301,11 @@ const VIGNETTES: Vignette[] = [
     draw: (t) => (
       <>
         {/* cross-section: contoured hollow, pelvis caught on the leading wall */}
-        <path d={`M 640 720 Q 810 660 960 720 L 960 780 L 640 780 Z`} fill={WARM.teal + '66'} stroke={V_STROKE} strokeWidth={4} />
-        <circle cx={800 + 44 * t} cy={694} r={44} fill={WARM.red + 'bb'} />
+        <path d={`M 480 ${VB_Y - 90} Q 660 ${VB_Y - 156} 840 ${VB_Y - 90} L 840 ${VB_Y} L 480 ${VB_Y} Z`} fill={WARM.teal + '66'} stroke={V_STROKE} strokeWidth={4} />
+        <circle cx={640 + 44 * t} cy={VB_Y - 116} r={48} fill={WARM.red + 'bb'} />
         {/* blocked arrow */}
-        <line x1={880} y1={694} x2={1060} y2={694} stroke={WARM.red} strokeWidth={7} strokeDasharray="16 12" strokeLinecap="round" opacity={t} />
-        <line x1={962} y1={652} x2={962} y2={736} stroke={WARM.red} strokeWidth={7} strokeLinecap="round" opacity={t} />
+        <line x1={730} y1={VB_Y - 116} x2={930} y2={VB_Y - 116} stroke={WARM.red} strokeWidth={7} strokeDasharray="16 12" strokeLinecap="round" opacity={t} />
+        <line x1={800} y1={VB_Y - 168} x2={800} y2={VB_Y - 64} stroke={WARM.red} strokeWidth={7} strokeLinecap="round" opacity={t} />
       </>
     ),
   },
@@ -280,7 +326,9 @@ export const A5_FiveTools: React.FC = () => {
         world="warm" eyebrow={`EXISTING TOOL ${i + 1} OF 5`} y={86}
         head={<>{v.label}</>} sub={v.verdict}
       />
-      <svg width={1920} height={1080} style={{ position: 'absolute', opacity: inO }}>{v.draw(t, f)}</svg>
+      <svg width={1920} height={1080} style={{ position: 'absolute', opacity: inO }}>
+        <g transform="translate(-225 230) scale(1.5)">{v.draw(t, f)}</g>
+      </svg>
       {/* X tracker */}
       <div style={{ position: 'absolute', bottom: 64, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 20 }}>
         {[0, 1, 2, 3, 4].map((k) => {

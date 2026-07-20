@@ -12,6 +12,7 @@
 # ---- Node / build noise inside the allowed projects ----
 aeroglide-film/node_modules/
 aeroglide-film/.verify/
+aeroglide-film/.qa/
 aeroglide-film/out/*.png
 aeroglide-film/out/film-probe*.mp4
 aeroglide-film/*.log
