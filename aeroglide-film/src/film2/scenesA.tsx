@@ -317,16 +317,28 @@ export const A5_FiveTools: React.FC = () => {
   const i = Math.min(Math.floor(f / PER), 4)
   const local = f - i * PER
   const t = ease(local, [15, 90], [0, 1])
-  const inO = ease(local, [0, 14], [0, 1])
+  // Each tool now dips in AND out, so the five swaps read as intentional
+  // dissolves instead of hard cuts (the most visible "cut" problem in v1).
+  const segIn = ease(local, [0, 16], [0, 1])
+  const segOut = ease(local, [PER - 18, PER - 2], [1, 0])
+  const segO = segIn * segOut
+  // slow push across each tool's 5s — keeps a still frame alive
+  const push = 1 + (local / PER) * 0.06
+  const drift = (local / PER) * -14
   const v = VIGNETTES[i]
   const xStamp = local >= 116
   return (
     <WarmFrame>
-      <CaptionBlock
-        world="warm" eyebrow={`EXISTING TOOL ${i + 1} OF 5`} y={86}
-        head={<>{v.label}</>} sub={v.verdict}
-      />
-      <svg width={1920} height={1080} style={{ position: 'absolute', opacity: inO }}>
+      <div style={{ opacity: segO }}>
+        <CaptionBlock
+          world="warm" eyebrow={`EXISTING TOOL ${i + 1} OF 5`} y={86}
+          head={<>{v.label}</>} sub={v.verdict}
+        />
+      </div>
+      <svg
+        width={1920} height={1080}
+        style={{ position: 'absolute', opacity: segO, transform: `scale(${push}) translateY(${drift}px)` }}
+      >
         <g transform="translate(-225 230) scale(1.5)">{v.draw(t, f)}</g>
       </svg>
       {/* X tracker */}
