@@ -1,8 +1,14 @@
 # AeroGlide — Voiceover + Music Script v3 (FINAL CUT)
 
-Timed to the delivered `out/film2.mp4`: **2:33.58, 4,606 frames @ 30 fps.**
-Every timestamp below is the scene's true start frame in the final render —
-record against the picture and the sync will hold.
+Timed to the delivered cut: **2:43.6, 4,906 frames @ 30 fps** (interventions
+extended to 7s each). Every timestamp below is the scene's true start in the
+final render — record against the picture and the sync will hold.
+
+**A voiced cut is delivered: `out/film2-voiced.mp4`** — narrated with the
+Windows "David" TTS voice (offline, no credits), timed to every scene marker.
+The exact lines spoken are the trimmed "AS DELIVERED" list at the bottom (they
+are tighter than the prose below so each line fits its scene at a natural
+pace). Swap in a human or studio-AI read later using the same timings.
 
 **Delivery:** documentary narrator — low, unhurried, never salesy. Read at
 ~2.3 words/second. The word counts are deliberately under each scene's
@@ -157,3 +163,33 @@ fade to pure black.
 - Record to picture. If a line runs long, cut words, never rush the read.
 - Leave A1's photo and B1's reveal at least 2s of clean silence each.
 - A teammate's calm phone-recorded read over this cut beats a silent film.
+
+---
+
+## AS DELIVERED — David TTS lines + timecodes (`film2-voiced.mp4`)
+
+| # | Scene | In | Line |
+|---|---|---|---|
+| 01 | A1 | 0:01 | In every ward, and every home, the same quiet moment. Someone must be moved. Someone must lift them. |
+| 02 | A2 | 0:09 | One manual transfer drives forty-five hundred newtons through the spine, past the line where injury begins. |
+| 03 | A3 | 0:18 | Seventy-two percent of nurses carry chronic low-back pain. Three hundred and thirty-eight are seriously injured every year. |
+| 04 | A4 | 0:27 | And it is only growing. More patients, more beds, and the same two hands. |
+| 05 | A5·1 | 0:35 | Five tools already exist. The slide board bridges the gap, but it cannot lift. |
+| 06 | A5·2 | 0:42 | The air cushion balloons sideways, leaving the patient perched and unstable. |
+| 07 | A5·3 | 0:49 | The hoist is as stressful as lifting by hand, and far slower. |
+| 08 | A5·4 | 0:56 | The walking belt only works for those who can already stand. |
+| 09 | A5·5 | 1:03 | The pressure cushion cradles the pelvis, the very thing that traps them. |
+| 10 | A6 | 1:09 | Not one addresses the lift itself. |
+| 11 | B1 | 1:13 | This is AeroGlide. Lift. Bridge. Slide. |
+| 12 | B2 | 1:20 | A lift of millimeters changes the physics. Forty-five hundred newtons drops below twenty-four hundred. Back under the line. |
+| 13 | B4 | 1:29 | Six engineered layers. A wipe-clean cover, an air bladder, an aluminum plate. Air only. |
+| 14 | B3 | 1:38 | A rigid bridge closes the gap, clamped to the wheelchair's frame. Never the wheel. |
+| 15 | B5 | 1:46 | The lift will not run unless the bridge is locked. If anything fails, it deflates in under two seconds. |
+| 16 | B6 | 1:55 | Bench-tested, not modeled. Safety factor five point seven. Rated to a hundred and twenty kilograms. |
+| 17 | B7 | 2:03 | When a part wears, replace a forty-dollar bladder, not the machine. Fully recyclable. |
+| 18 | C1 | 2:10 | One system, two markets. Institutions that carry the cost of injury, and families funded by the Home Caregiving Grant. |
+| 19 | C1b | 2:19 | We don't sell a device. We sell the evidence. A pilot, measured injury reduction, then every care channel in Singapore. |
+| 20 | C2 | 2:28 | Around three hundred and fifty dollars. Off-the-shelf parts. Ready for the real world. |
+| 21 | C3 | 2:35 | AeroGlide. One controlled lift, to a safer transfer. |
+
+Regenerate/retune with `.qa/vo/gen.ps1` (SAPI voice + rate) then re-mux.
