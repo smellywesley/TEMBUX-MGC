@@ -151,98 +151,111 @@ const TOOLS: Tool[] = [
   },
 ]
 
-const PER = 150
+// 7s per tool (was 5s) so each intervention has room to land — the failure
+// act is the film's credibility spine and it was flying by too fast.
+const PER = 210
+// crossfade window between tools — the incoming tool rises ON TOP of the
+// outgoing one, so the scene never passes through black (the old segIn/segOut
+// both hit zero at the boundary, producing a ~0.5s black flash every swap).
+const XF = 26
+export const A5_TOTAL = PER * TOOLS.length // 1050
+
+// One tool layer. It only ever fades IN; the next layer paints over it, so no
+// layer needs to fade to black. Ken Burns runs on its own clamped local clock.
+const ToolLayer: React.FC<{ t: Tool; start: number; f: number }> = ({ t, start, f }) => {
+  const local = Math.min(Math.max(f - start, 0), PER + XF)
+  const appear = ease(f, [start, start + XF], [0, 1]) // crossfade in over the layer below
+  const nameIn = ease(local, [14, 40], [0, 1])
+  const critIn = ease(local, [34, 64], [0, 1])
+  const citeIn = ease(local, [58, 84], [0, 1])
+  return (
+    <AbsoluteFill style={{ opacity: appear }}>
+      <PhotoPlate src={t.photo} frame={local} duration={PER} zoomIn={t.zoomIn} scrim="left" />
+      <div style={{ position: 'absolute', left: 110, top: 220, width: 660 }}>
+        <div style={{ ...LABEL_STYLE, fontSize: 20, color: '#E8A79A' }}>
+          EXISTING TOOL {t.n} / 05
+        </div>
+        <div
+          style={{
+            fontFamily: FONTS.serif, fontWeight: 600, fontSize: 68, color: '#FDFBF7',
+            marginTop: 18, letterSpacing: '-0.01em', lineHeight: 1.08,
+            opacity: nameIn, transform: `translateY(${(1 - nameIn) * 18}px)`,
+            textShadow: '0 2px 24px rgba(0,0,0,0.45)',
+          }}
+        >
+          {t.name}
+        </div>
+        <div
+          style={{
+            width: 74, height: 3, background: WARM.red, marginTop: 24,
+            transform: `scaleX(${critIn})`, transformOrigin: 'left',
+          }}
+        />
+        <div
+          style={{
+            fontFamily: FONTS.sans, fontSize: 27, lineHeight: 1.55,
+            color: 'rgba(253,251,247,0.90)', marginTop: 24,
+            opacity: critIn, transform: `translateY(${(1 - critIn) * 12}px)`,
+            textShadow: '0 2px 18px rgba(0,0,0,0.5)',
+          }}
+        >
+          {t.critique}
+        </div>
+        {t.cite && (
+          <div
+            style={{
+              fontFamily: FONTS.sans, fontSize: 18, letterSpacing: '0.08em',
+              color: 'rgba(253,251,247,0.55)', marginTop: 20, opacity: citeIn,
+            }}
+          >
+            {t.cite}
+          </div>
+        )}
+      </div>
+    </AbsoluteFill>
+  )
+}
 
 export const A5_FiveToolsPhoto: React.FC = () => {
   const f = useCurrentFrame()
-  const i = Math.min(Math.floor(f / PER), TOOLS.length - 1)
-  const local = f - i * PER
-  const t = TOOLS[i]
-
-  // dissolve each tool in and out so the five swaps read as intentional
-  const segIn = ease(local, [0, 18], [0, 1])
-  const segOut = ease(local, [PER - 20, PER - 2], [1, 0])
-  const segO = segIn * segOut
-
-  const nameIn = ease(local, [12, 36], [0, 1])
-  const critIn = ease(local, [30, 58], [0, 1])
-  const citeIn = ease(local, [52, 76], [0, 1])
-  const xAt = 104
+  const cur = Math.min(Math.floor(f / PER), TOOLS.length - 1)
+  const localCur = f - cur * PER
+  const xAt = 150 // failure X stamps ~5s into each tool, leaving it to breathe
 
   return (
     <AbsoluteFill style={{ background: '#000' }}>
-      <AbsoluteFill style={{ opacity: segO }}>
-        <PhotoPlate src={t.photo} frame={local} duration={PER} zoomIn={t.zoomIn} scrim="left" />
+      {/* photo layers — later tools paint over earlier ones during the crossfade,
+          so the scene never dips to black between interventions */}
+      {TOOLS.map((t, k) => (
+        <ToolLayer key={k} t={t} start={k * PER} f={f} />
+      ))}
 
-        {/* left rail — type on the darkest side of the frame */}
-        <div style={{ position: 'absolute', left: 110, top: 220, width: 660 }}>
-          <div style={{ ...LABEL_STYLE, fontSize: 20, color: '#E8A79A' }}>
-            EXISTING TOOL {t.n} / 05
-          </div>
-          <div
-            style={{
-              fontFamily: FONTS.serif, fontWeight: 600, fontSize: 68, color: '#FDFBF7',
-              marginTop: 18, letterSpacing: '-0.01em', lineHeight: 1.08,
-              opacity: nameIn, transform: `translateY(${(1 - nameIn) * 18}px)`,
-              textShadow: '0 2px 24px rgba(0,0,0,0.45)',
-            }}
-          >
-            {t.name}
-          </div>
-          <div
-            style={{
-              width: 74, height: 3, background: WARM.red, marginTop: 24,
-              transform: `scaleX(${critIn})`, transformOrigin: 'left',
-            }}
-          />
-          <div
-            style={{
-              fontFamily: FONTS.sans, fontSize: 27, lineHeight: 1.55,
-              color: 'rgba(253,251,247,0.90)', marginTop: 24,
-              opacity: critIn, transform: `translateY(${(1 - critIn) * 12}px)`,
-              textShadow: '0 2px 18px rgba(0,0,0,0.5)',
-            }}
-          >
-            {t.critique}
-          </div>
-          {t.cite && (
+      {/* failure tracker — one persistent overlay, driven by absolute frame */}
+      <div style={{ position: 'absolute', bottom: 70, left: 110, display: 'flex', gap: 16 }}>
+        {TOOLS.map((_, k) => {
+          const stampFrame = k * PER + xAt
+          const stamped = f >= stampFrame
+          const now = k === cur && localCur >= xAt
+          const p1 = now ? ease(localCur, [xAt, xAt + 5], [0, 1]) : stamped ? 1 : 0
+          const p2 = now ? ease(localCur, [xAt + 5, xAt + 10], [0, 1]) : stamped ? 1 : 0
+          const pop = now ? ease(localCur, [xAt, xAt + 10], [1.3, 1]) : 1
+          return (
             <div
+              key={k}
               style={{
-                fontFamily: FONTS.sans, fontSize: 18, letterSpacing: '0.08em',
-                color: 'rgba(253,251,247,0.55)', marginTop: 20, opacity: citeIn,
+                width: 42, height: 42, borderRadius: 10,
+                border: `2px solid ${stamped ? 'rgba(232,167,154,0.9)' : 'rgba(253,251,247,0.28)'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(20,16,14,0.45)',
               }}
             >
-              {t.cite}
-            </div>
-          )}
-        </div>
-
-        {/* failure tracker */}
-        <div style={{ position: 'absolute', bottom: 70, left: 110, display: 'flex', gap: 16 }}>
-          {TOOLS.map((_, k) => {
-            const stamped = k < i || (k === i && local >= xAt)
-            const now = k === i && local >= xAt
-            const p1 = now ? ease(local, [xAt, xAt + 5], [0, 1]) : stamped ? 1 : 0
-            const p2 = now ? ease(local, [xAt + 5, xAt + 10], [0, 1]) : stamped ? 1 : 0
-            const pop = now ? ease(local, [xAt, xAt + 10], [1.3, 1]) : 1
-            return (
-              <div
-                key={k}
-                style={{
-                  width: 42, height: 42, borderRadius: 10,
-                  border: `2px solid ${stamped ? 'rgba(232,167,154,0.9)' : 'rgba(253,251,247,0.28)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(20,16,14,0.45)',
-                }}
-              >
-                <div style={{ transform: `scale(${pop})`, opacity: stamped ? 1 : 0 }}>
-                  <XMark progress1={p1} progress2={p2} color="#E8776A" size={26} />
-                </div>
+              <div style={{ transform: `scale(${pop})`, opacity: stamped ? 1 : 0 }}>
+                <XMark progress1={p1} progress2={p2} color="#E8776A" size={26} />
               </div>
-            )
-          })}
-        </div>
-      </AbsoluteFill>
+            </div>
+          )
+        })}
+      </div>
     </AbsoluteFill>
   )
 }

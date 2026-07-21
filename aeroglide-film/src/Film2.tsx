@@ -52,7 +52,9 @@ const BEATS: Beat[] = [
   { id: 'A2', Comp: A2_ForceBar, duration: 330, next: { presentation: SLIDE_L(), frames: 22 } },
   { id: 'A3', Comp: A3_Isotype, duration: 300, next: { presentation: SLIDE_L(), frames: 22 } },
   { id: 'A4', Comp: A4_Demand, duration: 270, next: { presentation: SLIDE_UP(), frames: 26 } },
-  { id: 'A5', Comp: A5_FiveToolsPhoto, duration: 750, next: { presentation: fade(), frames: 34 } },
+  // 1050 = 5 tools x 210f (7s each). Extended from 25s -> 35s: the failure act
+  // is the credibility spine and it was flying by faster than it could land.
+  { id: 'A5', Comp: A5_FiveToolsPhoto, duration: 1050, next: { presentation: fade(), frames: 34 } },
   // the silence beat — and the warm->dark wash lives inside it.
   // ACT BOUNDARY: dip through black, never cross-fade (see dipToBlack.tsx).
   { id: 'A6', Comp: A6_Silence, duration: 150, next: { presentation: dipToBlack(), frames: 40 } },
